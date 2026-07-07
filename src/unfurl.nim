@@ -1,4 +1,4 @@
-import std/[parseopt,strformat,strscans]
+import std/[parseopt, strformat, strscans]
 
 proc showHelp() =
   stderr.writeLine("TBI") # TODO implement
@@ -8,6 +8,7 @@ var
   optParser = initOptParser(shortNoVal = {'h', 'v'}, longNoVal = @["help", "verbose"])
   argCount = 0
   argUrl = ""
+  cleanUrl: string
   optVerbose: bool
 
 for kind, key, val in optParser.getopt():
@@ -25,10 +26,16 @@ for kind, key, val in optParser.getopt():
 
 
 var
-  branch, owner, pr, repo: string
-if scanf(argUrl, "https://github.com/$+/$+/tree/$+", owner, repo, branch):
+  branch, owner, pr, preTag, repo: string
+
+if scanf(argUrl, "$+#", preTag):
+  cleanUrl = preTag
+else:
+  cleanUrl = argUrl
+
+if scanf(cleanUrl, "https://github.com/$+/$+/tree/$+", owner, repo, branch):
   echo &"github:{owner}/{repo}?ref={branch}"
-elif scanf(argUrl, "https://github.com/$+/$+/pull/$+", owner, repo, pr):
+elif scanf(cleanUrl, "https://github.com/$+/$+/pull/$+", owner, repo, pr):
   echo &"github:{owner}/{repo}/refs/pull/{pr}/head"
-elif scanf(argUrl, "https://github.com/$+/$+", owner, repo):
+elif scanf(cleanUrl, "https://github.com/$+/$+", owner, repo):
   echo &"github:{owner}/{repo}"
